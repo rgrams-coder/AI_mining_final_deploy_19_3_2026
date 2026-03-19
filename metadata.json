@@ -1,0 +1,8 @@
+{
+  "name": "CreatorNexus Dashboard",
+  "description": "A comprehensive all-in-one dashboard for digital creators featuring library management, royalty analytics, AI-powered notes, and professional consultancy.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

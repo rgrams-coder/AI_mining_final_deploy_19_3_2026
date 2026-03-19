@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+:root {
+  --brand-primary: #1e3a8a;
+  --brand-secondary: #3b82f6;
+  --brand-accent: #fbbf24;
+  --brand-light: #dbeafe;
+  --brand-dark: #1e293b;
+}
+
+.bg-brand-primary {
+  background-color: var(--brand-primary);
+}
+
+.bg-brand-secondary {
+  background-color: var(--brand-secondary);
+}
+
+.bg-brand-accent {
+  background-color: var(--brand-accent);
+}
+
+.bg-brand-light {
+  background-color: var(--brand-light);
+}
+
+.text-brand-primary {
+  color: var(--brand-primary);
+}
+
+.text-brand-secondary {
+  color: var(--brand-secondary);
+}
+
+.text-brand-accent {
+  color: var(--brand-accent);
+}
+
+.text-brand-light {
+  color: var(--brand-light);
+}
+
+.text-brand-dark {
+  color: var(--brand-dark);
+}
+
+.border-brand-light {
+  border-color: var(--brand-light);
+}
+
+.border-brand-secondary {
+  border-color: var(--brand-secondary);
+}
+
+.hover\:bg-brand-primary:hover {
+  background-color: var(--brand-primary);
+}
+
+.hover\:bg-brand-light:hover {
+  background-color: var(--brand-light);
+}
+
+.hover\:text-brand-primary:hover {
+  color: var(--brand-primary);
+}
+
+.hover\:text-brand-dark:hover {
+  color: var(--brand-dark);
+}
+
+.focus\:ring-brand-secondary:focus {
+  --tw-ring-color: var(--brand-secondary);
+}
