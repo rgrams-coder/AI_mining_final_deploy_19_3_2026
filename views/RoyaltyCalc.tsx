@@ -13,7 +13,7 @@ const RoyaltyCalc: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/minerals')
+    fetch('https://bbgm50gbv5.execute-api.ap-south-1.amazonaws.com/Prod/api/minerals')
       .then(res => res.json())
       .then(data => {
         console.log('Fetched minerals:', data);
