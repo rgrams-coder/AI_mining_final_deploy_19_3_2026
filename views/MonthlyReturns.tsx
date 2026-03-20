@@ -50,7 +50,7 @@ const MonthlyReturns: React.FC = () => {
   });
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/minerals')
+    fetch('https://bbgm50gbv5.execute-api.ap-south-1.amazonaws.com/Prod/api/minerals')
       .then(res => res.json())
       .then(data => {
         setMinerals(data);
@@ -60,7 +60,7 @@ const MonthlyReturns: React.FC = () => {
       .catch(err => console.error('Failed to fetch minerals:', err));
     
     const token = localStorage.getItem('token');
-    fetch('http://localhost:8000/api/monthly-returns', {
+    fetch('https://bbgm50gbv5.execute-api.ap-south-1.amazonaws.com/Prod/api/monthly-returns', {
       headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -92,7 +92,7 @@ const MonthlyReturns: React.FC = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8000/api/monthly-returns', {
+      const response = await fetch('https://bbgm50gbv5.execute-api.ap-south-1.amazonaws.com/Prod/api/monthly-returns', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -113,7 +113,7 @@ const MonthlyReturns: React.FC = () => {
           dispatchTrain1: 0, dispatchTrain2: 0, dispatchTrain3: 0, royaltyRate: 0, challanIssued: 0
         });
         const token = localStorage.getItem('token');
-        fetch('http://localhost:8000/api/monthly-returns', {
+        fetch('https://bbgm50gbv5.execute-api.ap-south-1.amazonaws.com/Prod/api/monthly-returns', {
           headers: { 'Authorization': `Bearer ${token}` }
         })
           .then(res => res.json())
