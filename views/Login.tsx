@@ -37,7 +37,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     const amount = getRegistrationAmount();
     
     try {
-      const response = await fetch('http://localhost:8000/api/create-order', {
+      const response = await fetch('https://bbgm50gbv5.execute-api.ap-south-1.amazonaws.com/Prod/api/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount, email, name, role })
@@ -54,7 +54,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         order_id: order.order_id,
         handler: async function (response: any) {
           try {
-            const verifyResponse = await fetch('http://localhost:8000/api/verify-payment', {
+            const verifyResponse = await fetch('https://bbgm50gbv5.execute-api.ap-south-1.amazonaws.com/Prod/api/verify-payment', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
