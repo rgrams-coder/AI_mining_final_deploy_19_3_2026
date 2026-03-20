@@ -21,7 +21,7 @@ const MineralsManagement: React.FC = () => {
 
   const fetchMinerals = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/minerals');
+      const res = await fetch('https://bbgm50gbv5.execute-api.ap-south-1.amazonaws.com/Prod/api/minerals');
       if (res.ok) setMinerals(await res.json());
     } catch (error) {
       console.error('Error fetching minerals:', error);
@@ -32,7 +32,7 @@ const MineralsManagement: React.FC = () => {
   const updateMineral = async (mineralName: string) => {
     try {
       const token = authService.getToken();
-      const res = await fetch(`http://localhost:8000/api/admin/minerals/${mineralName}`, {
+      const res = await fetch(`https://bbgm50gbv5.execute-api.ap-south-1.amazonaws.com/Prod/api/admin/minerals/${mineralName}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
