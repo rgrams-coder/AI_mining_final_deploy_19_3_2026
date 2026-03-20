@@ -27,10 +27,10 @@ const AdminDashboard: React.FC = () => {
     try {
       const token = authService.getToken();
       const [usersRes, statsRes] = await Promise.all([
-        fetch('http://localhost:8000/api/admin/users', {
+        fetch('https://bbgm50gbv5.execute-api.ap-south-1.amazonaws.com/Prod/api/admin/users', {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        fetch('http://localhost:8000/api/admin/stats', {
+        fetch('https://bbgm50gbv5.execute-api.ap-south-1.amazonaws.com/Prod/api/admin/stats', {
           headers: { Authorization: `Bearer ${token}` }
         })
       ]);
@@ -50,7 +50,7 @@ const AdminDashboard: React.FC = () => {
     
     try {
       const token = authService.getToken();
-      const res = await fetch(`http://localhost:8000/api/admin/users/${email}`, {
+      const res = await fetch(`https://bbgm50gbv5.execute-api.ap-south-1.amazonaws.com/Prod/api/admin/users/${email}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
