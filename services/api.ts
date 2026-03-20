@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'https://bbgm50gbv5.execute-api.ap-south-1.amazonaws.com/Prod';
 
 export const apiService = {
   async submitContact(formData: { name: string; email: string; message: string }) {
