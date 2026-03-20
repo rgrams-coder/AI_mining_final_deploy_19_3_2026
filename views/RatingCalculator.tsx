@@ -65,7 +65,7 @@ export default function RatingCalculator() {
     setSaving(true);
     try {
       const token = localStorage.getItem('token');
-      await fetch('http://localhost:8000/api/star-rating', {
+      await fetch('https://bbgm50gbv5.execute-api.ap-south-1.amazonaws.com/Prod/api/star-rating', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ year, profile, selectedMine, landUse, statutory })
