@@ -41,7 +41,7 @@ const RoyaltyCalc: React.FC = () => {
   const calculateRoyalty = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/api/calculate-royalty', {
+      const response = await fetch('https://bbgm50gbv5.execute-api.ap-south-1.amazonaws.com/Prod/api/calculate-royalty', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ royaltyRate, quantity, area })
