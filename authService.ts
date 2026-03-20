@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:8000/api';
+const API_URL = 'https://bbgm50gbv5.execute-api.ap-south-1.amazonaws.com/Prod/api';
 
 export interface AuthResponse {
   access_token: string;
