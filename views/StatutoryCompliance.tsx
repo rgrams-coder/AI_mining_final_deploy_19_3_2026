@@ -12,7 +12,7 @@ interface ComplianceFile {
 }
 
 const CATEGORIES = ['Mine Plan', 'Environment Clearance', 'CTO/CTE', 'DGMS', 'Labour', 'Others'];
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'https://bbgm50gbv5.execute-api.ap-south-1.amazonaws.com/Prod';
 
 const StatutoryCompliance: React.FC = () => {
   const [files, setFiles] = useState<ComplianceFile[]>([]);
