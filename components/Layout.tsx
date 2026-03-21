@@ -29,7 +29,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange }) =
     { id: 'royalty', label: 'Royalty Calculator', icon: Icons.Calculator },
     { id: 'ratings', label: 'Star Rating - Minor Mineral', icon: Icons.Star },
     { id: 'star', label: 'Star Rating -Major Mineral ', icon: Icons.Star },
-    { id: 'consultancy', label: 'Expert's Assistance', icon: Icons.Consultancy },
+    { id: 'consultancy', label: "Expert's Assistance", icon: Icons.Consultancy },
     { id: 'profile', label: 'Profile', icon: Icons.Profile },
   ] as const;
 
