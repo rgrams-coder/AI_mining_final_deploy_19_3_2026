@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Ebook } from '../types';
 import { libraryService } from '../libraryService';
 import { authService } from '../authService';
+import { loadNotes, saveNotes } from './Notes';
 
 const Library: React.FC = () => {
   const [filter, setFilter] = useState('All');
@@ -26,7 +27,6 @@ const Library: React.FC = () => {
   });
   const [uploading, setUploading] = useState(false);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
-  const [coverFile, setCoverFile] = useState<File | null>(null);
 
   useEffect(() => {
     loadEbooks();
@@ -35,10 +35,9 @@ const Library: React.FC = () => {
   const loadEbooks = async () => {
     try {
       setLoading(true);
-      const data = filter === 'Your Library' 
-        ? await libraryService.getMyLibrary()
-        : await libraryService.getEbooks(filter === 'All' ? undefined : filter);
-      setEbooks(data);
+      const data = await libraryService.getEbooks(filter === 'All' ? undefined : filter);
+      const seen = new Set();
+      setEbooks(data.filter((e: Ebook) => seen.has(e.id) ? false : seen.add(e.id)));
     } catch (error: any) {
       console.error('Failed to load ebooks:', error);
       alert('Failed to load ebooks. Make sure backend is running on port 8000.');
@@ -51,17 +50,16 @@ const Library: React.FC = () => {
     e.preventDefault();
     try {
       setUploading(true);
+      if (!editingEbook && !pdfFile) {
+        alert('Please select a PDF file.');
+        setUploading(false);
+        return;
+      }
       let fileUrl = formData.fileUrl;
-      let coverUrl = formData.coverUrl;
-
       if (pdfFile) {
-        fileUrl = await libraryService.uploadFile(pdfFile);
+        fileUrl = await libraryService.uploadToS3(pdfFile);
       }
-      if (coverFile) {
-        coverUrl = await libraryService.uploadFile(coverFile);
-      }
-
-      const ebookData = { ...formData, fileUrl, coverUrl };
+      const ebookData = { ...formData, fileUrl };
 
       if (editingEbook) {
         await libraryService.updateEbook(editingEbook.id, ebookData);
@@ -116,26 +114,58 @@ const Library: React.FC = () => {
       requiredPlan: 'Free'
     });
     setPdfFile(null);
-    setCoverFile(null);
   };
 
-  const handleEbookClick = (ebook: Ebook) => {
+  const [presignedUrl, setPresignedUrl] = useState('');
+
+  const handleEbookClick = async (ebook: Ebook) => {
     if (ebook.hasAccess) {
-      setSelectedEbook(ebook);
-      const savedNotes = localStorage.getItem(`notes_${ebook.id}`);
-      setNotes(savedNotes || '');
+      try {
+        setPresignedUrl('');
+        setSelectedEbook(ebook);
+        const savedNotes = loadNotes().find(n => n.id === `ebook_${ebook.id}`)?.content;
+        setNotes(savedNotes || '');
+        const url = await libraryService.getPresignedUrl(ebook.id);
+        setPresignedUrl(url);
+      } catch (error: any) {
+        alert('Failed to open PDF: ' + error.message);
+      }
+    }
+  };
+
+  const handleIframeError = async () => {
+    if (selectedEbook) {
+      try {
+        const url = await libraryService.getPresignedUrl(selectedEbook.id);
+        setPresignedUrl(url);
+      } catch {
+        alert('Session expired. Please go back and reopen the document.');
+      }
     }
   };
 
   const handleNotesChange = (value: string) => {
     setNotes(value);
     if (selectedEbook) {
-      localStorage.setItem(`notes_${selectedEbook.id}`, value);
+      const allNotes = loadNotes();
+      const noteId = `ebook_${selectedEbook.id}`;
+      const existing = allNotes.findIndex(n => n.id === noteId);
+      const noteEntry = {
+        id: noteId,
+        title: `📖 ${selectedEbook.title}`,
+        content: value,
+        date: new Date().toLocaleDateString(),
+        tags: ['library', selectedEbook.category.toLowerCase()],
+      };
+      if (existing >= 0) allNotes[existing] = noteEntry;
+      else allNotes.unshift(noteEntry);
+      saveNotes(allNotes);
     }
   };
 
   const closeReader = () => {
     setSelectedEbook(null);
+    setPresignedUrl('');
     setNotes('');
   };
 
@@ -156,11 +186,16 @@ const Library: React.FC = () => {
         </div>
         <div className="flex-1 flex overflow-hidden">
           <div className="flex-1 bg-gray-100 p-4">
-            <iframe
-              src={selectedEbook.fileUrl}
-              className="w-full h-full rounded-lg shadow-lg"
-              title={selectedEbook.title}
-            />
+            {presignedUrl ? (
+              <iframe
+                src={presignedUrl}
+                className="w-full h-full rounded-lg shadow-lg"
+                title={selectedEbook.title}
+                onError={handleIframeError}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-500">Loading PDF...</div>
+            )}
           </div>
           <div className="w-96 bg-white border-l flex flex-col">
             <div className="px-4 py-3 border-b bg-gray-50">
@@ -186,7 +221,7 @@ const Library: React.FC = () => {
           <p className="text-gray-500">Access legal documents and resources.</p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          {['All', 'Bare Acts', 'Notifications', 'Government Orders', 'Judgements', 'Your Library'].map(cat => (
+          {['All', 'Bare Acts', 'Notifications', 'Government Orders', 'Judgements'].map(cat => (
             <button
               key={cat}
               onClick={() => setFilter(cat)}
@@ -200,7 +235,7 @@ const Library: React.FC = () => {
         </div>
       </div>
 
-      {(isAdmin || filter === 'Your Library') && (
+      {isAdmin && (
         <button
           onClick={() => { setShowAddModal(true); setEditingEbook(null); resetForm(); }}
           className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
@@ -340,7 +375,9 @@ const Library: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">PDF File</label>
+                <label className="block text-sm font-medium mb-1">
+                  PDF File {!editingEbook && <span className="text-red-500">*</span>}
+                </label>
                 <input
                   type="file"
                   accept=".pdf"
@@ -348,28 +385,7 @@ const Library: React.FC = () => {
                   className="w-full border rounded px-3 py-2"
                 />
                 {pdfFile && <p className="text-sm text-green-600 mt-1">Selected: {pdfFile.name}</p>}
-                <p className="text-xs text-gray-500 mt-1">Or enter URL below</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">File URL</label>
-                <input
-                  type="url"
-                  value={formData.fileUrl}
-                  onChange={e => setFormData({...formData, fileUrl: e.target.value})}
-                  className="w-full border rounded px-3 py-2"
-                  required={!pdfFile}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Cover Image (Optional)</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={e => setCoverFile(e.target.files?.[0] || null)}
-                  className="w-full border rounded px-3 py-2"
-                />
-                {coverFile && <p className="text-sm text-green-600 mt-1">Selected: {coverFile.name}</p>}
-                <p className="text-xs text-gray-500 mt-1">Or enter URL below</p>
+                {editingEbook && !pdfFile && <p className="text-xs text-gray-500 mt-1">Leave empty to keep existing file</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Cover Image URL (Optional)</label>
