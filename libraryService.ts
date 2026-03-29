@@ -1,7 +1,3 @@
-import { authService } from './authService';
-
-const API_URL = 'https://bbgm50gbv5.execute-api.ap-south-1.amazonaws.com/Prod/api';
-
 export interface Ebook {
   id: string;
   title: string;
@@ -16,17 +12,26 @@ export interface Ebook {
 }
 
 export const libraryService = {
-  async uploadFile(file: File): Promise<string> {
+  async uploadToS3(file: File): Promise<string> {
     const token = authService.getToken();
     const formData = new FormData();
     formData.append('file', file);
-    
     const response = await fetch(`${API_URL}/upload`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: formData,
     });
-    if (!response.ok) throw new Error('Failed to upload file');
+    if (!response.ok) throw new Error('Failed to upload file to S3');
+    const data = await response.json();
+    return data.url;
+  },
+
+  async getPresignedUrl(id: string): Promise<string> {
+    const token = authService.getToken();
+    const response = await fetch(`${API_URL}/ebooks/${id}/presigned-url`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (!response.ok) throw new Error('Failed to get presigned URL');
     const data = await response.json();
     return data.url;
   },
