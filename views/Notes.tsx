@@ -1,18 +1,32 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Note } from '../types';
 import { getNoteSummary } from '../geminiService';
 
-const initialNotes: Note[] = [
-  { id: '1', title: 'Chapter 5 Ideas', content: 'Focus on the character evolution in the cyberpunk setting. Need more neon descriptions.', date: 'Oct 24, 2023', tags: ['writing'] },
-  { id: '2', title: 'Marketing Hook', content: 'Use the paradox of choice to explain why users need a curator. Target productivity enthusiasts.', date: 'Oct 22, 2023', tags: ['marketing', 'strategy'] },
-];
+const NOTES_KEY = 'app_notes';
+
+export const loadNotes = (): Note[] => {
+  try { return JSON.parse(localStorage.getItem(NOTES_KEY) || '[]'); } catch { return []; }
+};
+
+export const saveNotes = (notes: Note[]) => {
+  localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+};
 
 const Notes: React.FC = () => {
-  const [notes, setNotes] = useState<Note[]>(initialNotes);
+  const [notes, setNotes] = useState<Note[]>([]);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [summary, setSummary] = useState<string>('');
   const [isSummarizing, setIsSummarizing] = useState(false);
+
+  useEffect(() => {
+    setNotes(loadNotes());
+  }, []);
+
+  const updateNotes = (updated: Note[]) => {
+    setNotes(updated);
+    saveNotes(updated);
+  };
 
   const handleSummarize = async () => {
     if (!selectedNote) return;
@@ -30,7 +44,7 @@ const Notes: React.FC = () => {
       date: new Date().toLocaleDateString(),
       tags: [],
     };
-    setNotes([newNote, ...notes]);
+    updateNotes([newNote, ...notes]);
     setSelectedNote(newNote);
     setSummary('');
   };
@@ -76,7 +90,7 @@ const Notes: React.FC = () => {
                 value={selectedNote.title}
                 onChange={(e) => {
                   const updated = notes.map(n => n.id === selectedNote.id ? {...n, title: e.target.value} : n);
-                  setNotes(updated);
+                  updateNotes(updated);
                   setSelectedNote({...selectedNote, title: e.target.value});
                 }}
                 className="bg-transparent font-bold text-lg focus:outline-none w-1/2"
@@ -97,7 +111,7 @@ const Notes: React.FC = () => {
               value={selectedNote.content}
               onChange={(e) => {
                 const updated = notes.map(n => n.id === selectedNote.id ? {...n, content: e.target.value} : n);
-                setNotes(updated);
+                updateNotes(updated);
                 setSelectedNote({...selectedNote, content: e.target.value});
               }}
             />
