@@ -10,7 +10,7 @@ const ROLES = [
   { value: 'Mineral Dealers', label: 'Mineral Dealers', amount: 5000 },
   { value: 'Others', label: 'Others (Govt/PSU)', amount: 5000 },
   { value: 'Firms/Company', label: 'Firms/Company', amount: 10000 },
-  { value: 'Experts', label: 'Experts', amount: 5000}
+  { value: 'Experts', label: 'Experts', amount: 5000},
   { value: 'Students', label: 'Students', amount: 1000 },
   { value: 'Researchers', label: 'Researchers', amount: 1000 }
 ];
